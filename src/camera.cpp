@@ -148,7 +148,13 @@ void Camera::turnLeft() {
 	//     meaning the camera should not move to another location. It should look at somewhere to the left.
 	// Step1: get the rotation matrix using "Camera::rotate" you just implemented and using "rotStep".
 	// Step2: update "camCenter".
-
+	glm::vec3 y_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 rot_mat = Camera::rotate(rotStep, y_axis);
+	glm::vec4 center_4 = glm::vec4(camCenter - camCoords, 1.0f);
+	center_4 = rot_mat * center_4;
+	camCenter.x = center_4.x;
+	camCenter.y = center_4.y;
+	camCenter.z = center_4.z;
 	updateViewProj();  // update view
 }
 
@@ -159,7 +165,13 @@ void Camera::turnRight() {
 	// ################### TODO5 ###################
 	// Task: (part of city roaming) implement the "turning right" function (controlled by keyboard).
 	// Step1: similar to "Camera::turnLeft"
-
+	glm::vec3 y_axis = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 rot_mat = Camera::rotate(-rotStep, y_axis);
+	glm::vec4 center_4 = glm::vec4(camCenter - camCoords, 1.0f);
+	center_4 = rot_mat * center_4;
+	camCenter.x = center_4.x;
+	camCenter.y = center_4.y;
+	camCenter.z = center_4.z;
 	updateViewProj();  // update view
 }
 
@@ -170,6 +182,13 @@ void Camera::moveForward() {
 		// Remember that the movement of the camera should be parallel to plane defined by xz.
 		// Step1: get the translation matrix using "Camera::translate" provided and "moveStep".
 		// Step2: update "camCoords" and "camCenter"; they should be updated in the same way.
+		glm::vec3 forward = glm::normalize(camCenter - camCoords);  // get the direction vector
+		forward[1] = 0.0f;
+		glm::mat4 translation = translate(forward * moveStep);  // get the translation matrix
+		glm::vec4 temp = translation * glm::vec4(camCoords, 1.0);  // move the camera coordinates forward
+		camCoords.x = temp.x / temp.w; camCoords.y = temp.y / temp.w; camCoords.z = temp.z / temp.w;  // normalize
+		temp = translation * glm::vec4(camCenter, 1.0);
+		camCenter.x = temp.x / temp.w; camCenter.y = temp.y / temp.w; camCenter.z = temp.z / temp.w;
 	}
 	else
 		return;
@@ -182,6 +201,13 @@ void Camera::moveBackward() {
 		// Task: (part of city roaming) implement the "moving backward" function (controlled by keyboard).
 		// Remember that the movement of the camera should be parallel to plane defined by xz.
 		// Step1: similar to "Camera::moveForward".
+		glm::vec3 backward = glm::normalize(-(camCenter - camCoords));
+		backward[1] = 0.0f;
+		glm::mat4 translation = translate(backward * moveStep);  // get the translation matrix
+		glm::vec4 temp = translation * glm::vec4(camCoords, 1.0);  // move the camera coordinates up
+		camCoords.x = temp.x / temp.w; camCoords.y = temp.y / temp.w; camCoords.z = temp.z / temp.w;  // normalize
+		temp = translation * glm::vec4(camCenter, 1.0);
+		camCenter.x = temp.x / temp.w; camCenter.y = temp.y / temp.w; camCenter.z = temp.z / temp.w;
 	}
 	else
 		return;

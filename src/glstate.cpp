@@ -151,6 +151,8 @@ void GLState::offsetCamera(float offset) {
 		// ################### TODO8 ###################
 		// Task: implement this function so that when using the scroll wheel, the camera will move closer / farther to the scene.
 		// Step1: update only z value of "camCoords" of the overhead camera "cam_overhead".
-		//        remember to set two cutoff values (near and far), so the camera cannot be moved too close / too far.
+		//        remember to set two cutoff values (near and far), so the camera cannot be moved too close / too far
+		float update = glm::clamp(cam_overhead.getCoords().z + offset, 5.0f, 30.0f); 
+		cam_overhead.setCoords(cam_overhead.getCoords().x, cam_overhead.getCoords().y, update);
 	}
 }
