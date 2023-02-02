@@ -35,7 +35,8 @@ void Camera::updateViewProj() {
 	// Steps:
 	// 1. implement "Camera::calCameraMat" which returns the "view" matrix; it has arguments: "camCoords", "camCenter" and "camUp".
 	// 2. REMOVE the line below, and replace that by calling your own function for computing "view": view = calCameraMat(..., ..., ...);
-	view = glm::lookAt(camCoords, camCenter, camUp);  //  should NOT be used in this assignment
+	//view = glm::lookAt(camCoords, camCenter, camUp);  //  should NOT be used in this assignment
+	view = calCameraMat(camCoords, camCenter, camUp);
 
 	if (camType == GROUND_VIEW || camType == OVERHEAD_VIEW) {  // perspective projection
 		proj = glm::perspective(glm::radians(fovy), aspect, 0.1f, 100.0f);
@@ -84,6 +85,25 @@ glm::mat4 Camera::calCameraMat(const glm::vec3 eye, const glm::vec3 center, cons
 	*/
 	// 3. Store the result in "res" (below).
 	glm::mat4 res = glm::mat4(1.0f);  // view matrix
+	glm::vec3 X = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 Y = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 Z = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec4 W = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	Z.x = eye.x - center.x;
+  	Z.y = eye.y - center.y;
+  	Z.z = eye.z - center.z;
+
+	Z = computeNorm(Z);
+	X = computeNorm(computeCross(up, Z));
+	Y = computeNorm(computeCross(Z, X));
+
+	glm::vec4 X_4 = glm::vec4(X, -computeDot(X, eye));
+	glm::vec4 Y_4 = glm::vec4(Y, -computeDot(Y, eye));
+	glm::vec4 Z_4 = glm::vec4(Z, -computeDot(Z, eye));
+
+	res = glm::mat4(X_4, Y_4, Z_4, W);
+
 	return computeTranspose(res);
 }
 
@@ -98,6 +118,16 @@ glm::mat4 Camera::rotate(const float degree, const glm::vec3 axis) {
 	// Step2: recall the 3 basic rotation matrices (around x, y and z) you learn in class.
 	// Step3: there should be 3 cases, conditioned on which axis to rotate around.
 	// Step4: fill in the rotation matrix "res" (above).
+	if(axis.x == 1.0f){
+		res[1] = glm::vec4(0.0f, cos(glm::radians(degree)), -sin(glm::radians(degree)), 0.0f);
+		res[2] = glm::vec4(0.0f, sin(glm::radians(degree)), cos(glm::radians(degree)), 0.0f);
+	}else if(axis.y == 1.0f) {
+		res[0] = glm::vec4(cos(glm::radians(degree)), 0.0f, -sin(glm::radians(degree)), 0.0f);
+		res[2] = glm::vec4(sin(glm::radians(degree)), 0.0f, cos(glm::radians(degree)), 0.0f);
+	}else{
+		res[0] = glm::vec4(cos(glm::radians(degree)), -sin(glm::radians(degree)), 0.0f, 0.0f);
+		res[1] = glm::vec4(sin(glm::radians(degree)), cos(glm::radians(degree)), 0.0f, 0.0f);
+	}
 
 	return res;
 }
